@@ -1,0 +1,115 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  VIEWER
+  AUTHOR
+  REVIEWER
+  ADMIN
+}
+
+enum DocumentStatus {
+  DRAFT
+  SUBMITTED
+  REJECTED
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AuditAction {
+  CREATED
+  EDITED
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PUBLISHED
+  ARCHIVED
+  REOPENED
+}
+
+model User {
+  id    String   @id @default(cuid())
+  name  String
+  email String   @unique
+  role  UserRole @default(AUTHOR)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownedDocuments Document[]   @relation("OwnedDocuments")
+  auditEvents    AuditEvent[]
+  sessions       Session[]
+}
+
+model Document {
+  id String @id @default(cuid())
+
+  title String
+  body  String
+
+  status DocumentStatus @default(DRAFT)
+
+  version Int @default(1)
+
+  ownerId String
+  owner User @relation("OwnedDocuments", fields: [ownerId], references: [id], onDelete: Restrict)
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditEvents AuditEvent[]
+
+  @@index([ownerId])
+  @@index([status, createdAt])
+}
+
+model AuditEvent {
+  id String @id @default(cuid())
+
+  action AuditAction
+
+  previousStatus DocumentStatus?
+  newStatus      DocumentStatus?
+
+  comment String?
+  metadata Json?
+
+  actorId String
+  actor User @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  documentId String
+  document Document @relation(fields: [documentId], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+
+  @@index([documentId, createdAt])
+  @@index([actorId])
+}
+
+model Session {
+  id String @id @default(cuid())
+
+  tokenHash String @unique
+
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  expiresAt DateTime 
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
