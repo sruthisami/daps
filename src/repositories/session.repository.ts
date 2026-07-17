@@ -19,8 +19,9 @@ export const sessionRepository = {
     });
   },
 
-  deleteByTokenHash(tokenHash: string): Promise<Session> {
-    return prisma.session.delete({
+  deleteByTokenHash(tokenHash: string){
+    //using deleteMany instead of delete to avoid potential race conditions and enforce idempotency
+    return prisma.session.deleteMany({
       where: {
         tokenHash,
       },
