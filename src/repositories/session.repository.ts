@@ -1,40 +1,47 @@
 import { prisma } from "@/lib/db";
+import { DatabaseClient } from "@/lib/transactionClient";
 import { Prisma, Session } from "@/generated/prisma/client";
 
-export const sessionRepository = {
-  create(data: Prisma.SessionCreateInput): Promise<Session> {
-    return prisma.session.create({
-      data,
-    });
-  },
+export function createSessionRepository(
+  db: DatabaseClient = prisma
+) {
+  return {
+    create(data: Prisma.SessionCreateInput): Promise<Session> {
+      return db.session.create({
+        data,
+      });
+    },
 
-  findByTokenHash(tokenHash: string) {
-    return prisma.session.findUnique({
-      where: {
-        tokenHash,
-      },
-      include: {
-        user: true,
-      },
-    });
-  },
+    findByTokenHash(tokenHash: string) {
+      return db.session.findUnique({
+        where: {
+          tokenHash,
+        },
+        include: {
+          user: true,
+        },
+      });
+    },
 
-  deleteByTokenHash(tokenHash: string){
-    //using deleteMany instead of delete to avoid potential race conditions and enforce idempotency
-    return prisma.session.deleteMany({
-      where: {
-        tokenHash,
-      },
-    });
-  },
+    deleteByTokenHash(tokenHash: string) {
+      //using deleteMany instead of delete to avoid potential race conditions and enforce idempotency
+      return db.session.deleteMany({
+        where: {
+          tokenHash,
+        },
+      });
+    },
 
-//   deleteExpired() {
-//     return prisma.session.deleteMany({
-//       where: {
-//         expiresAt: {
-//           lt: new Date(),
-//         },
-//       },
-//     });
-//   },
-};
+    //   deleteExpired() {
+    //     return db.session.deleteMany({
+    //       where: {
+    //         expiresAt: {
+    //           lt: new Date(),
+    //         },
+    //       },
+    //     });
+    //   },
+  };
+}
+
+export const sessionRepository = createSessionRepository();
