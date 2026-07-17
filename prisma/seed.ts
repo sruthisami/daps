@@ -1,5 +1,5 @@
 import { UserRole } from "../src/generated/prisma/enums";
-import { prisma } from "../src/app/lib/db";
+import { prisma } from "../src/lib/db";
 
 async function seedUsers() {
   const users = [
