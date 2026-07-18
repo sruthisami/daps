@@ -3,10 +3,7 @@ import { NextResponse } from "next/server";
 
 import { handleApiError } from "@/lib/api";
 import { authService } from "@/services/auth.service";
-import {
-  SESSION_COOKIE_NAME,
-  SESSION_COOKIE_OPTIONS,
-} from "@/utils/auth";
+import { SESSION_COOKIE_NAME } from "@/utils/auth";
 
 export async function POST() {
   try {
@@ -18,14 +15,16 @@ export async function POST() {
       await authService.logout(token);
     }
 
-    cookieStore.delete({
-      name: SESSION_COOKIE_NAME,
-      path: SESSION_COOKIE_OPTIONS.path,
-    });
+    cookieStore.delete(SESSION_COOKIE_NAME);
 
-    return new NextResponse(null, {
-      status: 204,
-    });
+    return NextResponse.json(
+      {
+        message: "Logged out successfully.",
+      },
+      {
+        status: 200,
+      },
+    );
   } catch (error) {
     return handleApiError(error);
   }

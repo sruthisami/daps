@@ -8,8 +8,12 @@ export async function GET() {
     const user = await requireUser();
 
     return NextResponse.json(
-      { user },
-      { status: 200 }
+      {
+        user,
+      },
+      {
+        status: 200,
+      },
     );
   } catch (error) {
     return handleApiError(error);

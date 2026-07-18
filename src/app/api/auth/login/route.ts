@@ -1,32 +1,37 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { handleApiError } from "@/lib/api";
 import { authService } from "@/services/auth.service";
-import {
-  SESSION_COOKIE_NAME,
-  SESSION_COOKIE_OPTIONS,
-} from "@/utils/auth";
+import { SESSION_COOKIE_NAME } from "@/utils/auth";
+import { SESSION_DURATION_MS } from "@/utils/session";
 import { loginSchema } from "@/validations/auth.validation";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const data = loginSchema.parse(body);
 
-    const { token, user } = await authService.login(data);
+    const input = loginSchema.parse(body);
+
+    const { token, user } = await authService.login(input);
 
     const cookieStore = await cookies();
 
-    cookieStore.set(
-      SESSION_COOKIE_NAME,
-      token,
-      SESSION_COOKIE_OPTIONS
-    );
+    cookieStore.set(SESSION_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      expires: new Date(Date.now() + SESSION_DURATION_MS),
+    });
 
     return NextResponse.json(
-      { user },
-      { status: 200 }
+      {
+        user,
+      },
+      {
+        status: 200,
+      },
     );
   } catch (error) {
     return handleApiError(error);
