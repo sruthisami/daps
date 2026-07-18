@@ -1,14 +1,8 @@
 import { prisma } from "@/lib/db";
 import { DatabaseClient } from "@/lib/transactionClient";
-import {
-  Prisma,
-  Document,
-  DocumentStatus,
-} from "@/generated/prisma/client";
+import { Prisma, Document, DocumentStatus } from "@/generated/prisma/client";
 
-export function createDocumentRepository(
-  db: DatabaseClient = prisma
-) {
+export function createDocumentRepository(db: DatabaseClient = prisma) {
   return {
     create(data: Prisma.DocumentCreateInput): Promise<Document> {
       return db.document.create({
@@ -60,8 +54,8 @@ export function createDocumentRepository(
     async update(
       id: string,
       expectedVersion: number,
-      data: Prisma.DocumentUpdateInput
-    ): Promise<boolean> {
+      data: Prisma.DocumentUpdateInput,
+    ): Promise<Document | null> {
       const result = await db.document.updateMany({
         where: {
           id,
@@ -75,7 +69,15 @@ export function createDocumentRepository(
         },
       });
 
-      return result.count === 1;
+      if (result.count === 0) {
+        return null;
+      }
+
+      return db.document.findUnique({
+        where: {
+          id,
+        },
+      });
     },
   };
 }
