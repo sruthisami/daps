@@ -1,9 +1,7 @@
 import { prisma } from "@/lib/db";
-import { DatabaseClient } from "@/lib/transactionClient";
+import { RepositoryDatabaseClient } from "@/lib/dbclient";
 
-export function createUserRepository(
-  db: DatabaseClient = prisma
-) {
+export function createUserRepository(db: RepositoryDatabaseClient = prisma) {
   return {
     findById(id: string) {
       return db.user.findUnique({

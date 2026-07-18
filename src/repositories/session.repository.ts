@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/db";
-import { DatabaseClient } from "@/lib/transactionClient";
+import { RepositoryDatabaseClient } from "@/lib/dbclient";
 import { Prisma, Session } from "@/generated/prisma/client";
 
-export function createSessionRepository(
-  db: DatabaseClient = prisma
-) {
+export function createSessionRepository(db: RepositoryDatabaseClient = prisma) {
   return {
     create(data: Prisma.SessionCreateInput): Promise<Session> {
       return db.session.create({

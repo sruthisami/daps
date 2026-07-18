@@ -1,10 +1,8 @@
 import { prisma } from "@/lib/db";
-import { DatabaseClient } from "@/lib/transactionClient";
+import { RepositoryDatabaseClient } from "@/lib/dbclient";
 import { Prisma, AuditEvent } from "@/generated/prisma/client";
 
-export function createAuditRepository(
-  db: DatabaseClient = prisma
-) {
+export function createAuditRepository(db: RepositoryDatabaseClient = prisma) {
   return {
     create(data: Prisma.AuditEventCreateInput): Promise<AuditEvent> {
       return db.auditEvent.create({

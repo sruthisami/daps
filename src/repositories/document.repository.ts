@@ -1,8 +1,8 @@
 import { prisma } from "@/lib/db";
-import { DatabaseClient } from "@/lib/transactionClient";
+import {  RepositoryDatabaseClient } from "@/lib/dbclient";
 import { Prisma, Document, DocumentStatus } from "@/generated/prisma/client";
 
-export function createDocumentRepository(db: DatabaseClient = prisma) {
+export function createDocumentRepository(db: RepositoryDatabaseClient = prisma) {
   return {
     create(data: Prisma.DocumentCreateInput): Promise<Document> {
       return db.document.create({
