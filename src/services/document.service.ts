@@ -519,6 +519,80 @@ export function createDocumentService(db: ServiceDatabaseClient = prisma,) {
     });
   }
 
+
+  //authorization helper for read ops
+
+    function assertCanView(document: Document, user: User): void {
+  if (document.ownerId === user.id) {
+    return;
+  }
+
+  if (document.status === DocumentStatus.PUBLISHED) {
+    return;
+  }
+
+  if (
+    (user.role === UserRole.REVIEWER ||
+      user.role === UserRole.ADMIN) &&
+    (
+      document.status === DocumentStatus.SUBMITTED ||
+      document.status === DocumentStatus.APPROVED ||
+      document.status === DocumentStatus.ARCHIVED
+    )
+  ) {
+    return;
+  }
+
+  throw new AuthorizationError(
+    "You are not authorized to view this document.",
+  );
+}
+
+    //read ops
+    async function findById(
+  id: string,
+  actor: User,
+): Promise<Document> {
+  const documentRepository = createDocumentRepository(db);
+
+  const document = await documentRepository.findById(id);
+
+  if (!document) {
+    throw new NotFoundError("Document not found.");
+  }
+
+  assertCanView(document, actor);
+
+  return document;
+}
+
+    async function findMyDocuments(
+  actor: User,
+): Promise<Document[]> {
+  assertAuthor(actor);
+
+  const documentRepository = createDocumentRepository(db);
+
+  return documentRepository.findByOwner(actor.id);
+}
+
+    async function findSubmittedDocuments(
+  actor: User,
+): Promise<Document[]> {
+  assertReviewerOrAdmin(actor);
+
+  const documentRepository = createDocumentRepository(db);
+
+  return documentRepository.findSubmitted();
+}
+
+    async function findPublishedDocuments(): Promise<Document[]> {
+  const documentRepository = createDocumentRepository(db);
+
+  return documentRepository.findPublished();
+}
+
+    
   return {
     create,
     edit,
@@ -528,6 +602,10 @@ export function createDocumentService(db: ServiceDatabaseClient = prisma,) {
     reopen,
     publish,
     archive,
+    findById,
+    findMyDocuments,
+    findSubmittedDocuments,
+    findPublishedDocuments,
   };
 }
 
