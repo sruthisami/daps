@@ -19,7 +19,7 @@ export const authService = {
     const user = await userRepository.findByEmail(email);
 
     if (!user) {
-      throw new AuthenticationError("Invalid email.");
+      throw new AuthenticationError("Invalid credentials.");
     }
 
     const token = generateSessionToken();
