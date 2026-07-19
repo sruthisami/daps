@@ -8,9 +8,7 @@ export async function GET() {
     const user = await requireUser();
 
     return NextResponse.json(
-      {
-        user,
-      },
+     user,
       {
         status: 200,
       },

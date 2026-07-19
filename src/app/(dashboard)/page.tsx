@@ -18,6 +18,121 @@ function formatStatus(status: string) {
   return status.replace(/_/g, " ").toLowerCase();
 }
 
+function AppOverview() {
+  return (
+    <div className="space-y-6 mb-8">
+      <div>
+        <p className="text-xs uppercase tracking-widest text-muted-foreground mb-1">
+          Workspace overview
+        </p>
+        <h1 className="text-2xl font-medium tracking-tight">
+          Controlled Document Approval
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1 leading-relaxed max-w-2xl">
+          A document moves through a controlled workflow before it becomes
+          public. Every state change is recorded. Nothing is ever silently
+          overwritten or deleted.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {[
+          {
+            label: "Workflow",
+            description: "Draft → Submitted → Approved → Published",
+          },
+          {
+            label: "Audit",
+            description:
+              "Every action is logged with actor, timestamp, and previous state.",
+          },
+          {
+            label: "Archival",
+            description:
+              "Documents are archived, never deleted. History is always preserved.",
+          },
+        ].map((item) => (
+          <div key={item.label} className="rounded-md bg-muted/50 p-4">
+            <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-1">
+              {item.label}
+            </p>
+            <p className="text-sm text-foreground leading-relaxed">
+              {item.description}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium">
+            Roles and responsibilities
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {[
+            {
+              role: "Viewer",
+              color: "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
+              actions: ["Read published documents"],
+            },
+            {
+              role: "Author",
+              color: "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
+              actions: [
+                "Create documents",
+                "Edit own drafts",
+                "Submit for review",
+                "Reopen rejected",
+              ],
+            },
+            {
+              role: "Reviewer",
+              color: "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
+              actions: [
+                "Approve submitted",
+                "Reject with comment",
+                "Publish approved",
+              ],
+            },
+            {
+              role: "Admin",
+              color: "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+              actions: ["Publish approved", "Archive any document"],
+            },
+          ].map(({ role, color, actions }) => (
+            <div
+              key={role}
+              className="grid grid-cols-[120px_1fr] gap-3 items-start py-2 border-b last:border-0"
+            >
+              <span
+                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium w-fit ${color}`}
+              >
+                {role}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {actions.map((action) => (
+                  <span
+                    key={action}
+                    className="text-xs px-2.5 py-0.5 rounded-full border bg-background text-muted-foreground"
+                  >
+                    {action}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+
+      <p className="text-xs text-muted-foreground leading-relaxed">
+        Permissions are enforced server-side. Hiding a button is not enough —
+        every action is verified against the current user's role and the
+        document's current state.
+      </p>
+    </div>
+  )
+}
 export default function DashboardPage() {
   const router = useRouter();
   const currentUser = useCurrentUser();

@@ -15,6 +15,16 @@ async function requireRole(role: UserRole): Promise<User> {
   return user;
 }
 
+export async function requireRoles(allowedRoles: UserRole[]) {
+  const user = await requireUser();
+
+  if (!allowedRoles.includes(user.role)) {
+    throw new AuthorizationError();
+  }
+
+  return user;
+}
+
 export function requireAuthor() {
   return requireRole(UserRole.AUTHOR);
 }

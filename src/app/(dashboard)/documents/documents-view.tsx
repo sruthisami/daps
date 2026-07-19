@@ -1,23 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { PlusCircle, ChevronDown, ChevronUp, RotateCcw } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  PlusCircle,
+  RotateCcw,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
 import {
   useCreateDocument,
+  useDocumentAudit,
   useMyDocuments,
+  useReopenDocument,
   useSubmitDocument,
   useUpdateDocument,
-  useReopenDocument,
-  useDocumentAudit,
 } from "@/frontend/hooks/use-documents";
+
 import type { AuditEvent } from "@/frontend/types/audit";
 import type { DocumentItem } from "@/frontend/types/document";
-
-// ─── helpers ────────────────────────────────────────────────────────────────
 
 function formatStatus(status: string) {
   return status.replace(/_/g, " ").toLowerCase();
@@ -41,48 +46,52 @@ const ACTION_LABEL: Record<AuditEvent["action"], string> = {
   REOPENED: "Reopened",
 };
 
-const ACTION_COLOR: Record<AuditEvent["action"], string> = {
-  CREATED: "bg-blue-500",
-  EDITED: "bg-slate-400",
-  SUBMITTED: "bg-yellow-500",
-  APPROVED: "bg-emerald-500",
-  REJECTED: "bg-red-500",
-  PUBLISHED: "bg-emerald-600",
-  ARCHIVED: "bg-slate-500",
-  REOPENED: "bg-violet-500",
+const ACTION_STYLE: Record<AuditEvent["action"], string> = {
+  CREATED: "bg-foreground",
+  EDITED: "bg-muted-foreground",
+  SUBMITTED: "bg-foreground",
+  APPROVED: "bg-foreground",
+  REJECTED: "bg-foreground",
+  PUBLISHED: "bg-foreground",
+  ARCHIVED: "bg-muted-foreground",
+  REOPENED: "bg-foreground",
 };
-
-// ─── audit history sub-component ────────────────────────────────────────────
 
 function AuditHistory({ documentId }: { documentId: string }) {
   const { data: events = [], isLoading } = useDocumentAudit(documentId);
 
   if (isLoading) {
     return (
-      <p className="pt-3 text-xs text-muted-foreground">Loading history…</p>
+      <p className="pt-3 text-xs text-muted-foreground">
+        Loading history…
+      </p>
     );
   }
 
   if (events.length === 0) {
     return (
-      <p className="pt-3 text-xs text-muted-foreground">No history yet.</p>
+      <p className="pt-3 text-xs text-muted-foreground">
+        No history yet.
+      </p>
     );
   }
 
   return (
     <ol className="relative mt-3 space-y-3 border-l border-border pl-4">
       {events.map((event) => (
-        <li key={event.id} className="relative">
-          {/* dot */}
+        <li
+          key={event.id}
+          className="relative"
+        >
           <span
-            className={`absolute -left-[1.3125rem] mt-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${ACTION_COLOR[event.action]}`}
-          />
-
+  className={`absolute -left-[1.3125rem] mt-1 h-2.5 w-2.5 rounded-full ring-2 ring-background ${ACTION_STYLE[event.action]}`}
+/>
           <div className="space-y-0.5">
             <div className="flex flex-wrap items-baseline gap-x-2">
               <span className="text-xs font-medium">
                 {ACTION_LABEL[event.action]}
               </span>
+
               <span className="text-xs text-muted-foreground">
                 by {event.actor.name}
                 <span className="ml-1 opacity-60">
@@ -107,22 +116,22 @@ function AuditHistory({ documentId }: { documentId: string }) {
   );
 }
 
-// ─── toggle wrapper ──────────────────────────────────────────────────────────
-
 function AuditToggle({ documentId }: { documentId: string }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div>
       <button
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         {open ? (
           <ChevronUp className="h-3 w-3" />
         ) : (
           <ChevronDown className="h-3 w-3" />
         )}
+
         {open ? "Hide history" : "View history"}
       </button>
 
@@ -130,8 +139,6 @@ function AuditToggle({ documentId }: { documentId: string }) {
     </div>
   );
 }
-
-// ─── main view ──────────────────────────────────────────────────────────────
 
 export default function DocumentsView() {
   const { data: documents = [], isLoading } = useMyDocuments();
@@ -141,11 +148,9 @@ export default function DocumentsView() {
   const submitDocument = useSubmitDocument();
   const reopenDocument = useReopenDocument();
 
-  // create
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
-  // edit
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const [editBody, setEditBody] = useState("");
@@ -154,18 +159,30 @@ export default function DocumentsView() {
     () => documents.filter((d) => d.status === "DRAFT"),
     [documents],
   );
+
   const submittedDocuments = useMemo(
     () => documents.filter((d) => d.status === "SUBMITTED"),
     [documents],
   );
+
   const rejectedDocuments = useMemo(
     () => documents.filter((d) => d.status === "REJECTED"),
     [documents],
   );
 
+  const publishedDocuments = useMemo(
+    () => documents.filter((d) => d.status === "PUBLISHED"),
+    [documents],
+  );
+
   async function handleCreate() {
     if (!title.trim() || !body.trim()) return;
-    await createDocument.mutateAsync({ title, body });
+
+    await createDocument.mutateAsync({
+      title,
+      body,
+    });
+
     setTitle("");
     setBody("");
   }
@@ -184,102 +201,148 @@ export default function DocumentsView() {
 
   async function handleSave(document: DocumentItem) {
     if (!editTitle.trim() || !editBody.trim()) return;
+
     await updateDocument.mutateAsync({
       id: document.id,
-      input: { expectedVersion: document.version, title: editTitle, body: editBody },
+      input: {
+        expectedVersion: document.version,
+        title: editTitle,
+        body: editBody,
+      },
     });
+
     cancelEditing();
   }
 
-  async function handleSubmit(documentId: string, expectedVersion: number) {
-    await submitDocument.mutateAsync({ id: documentId, expectedVersion });
+  async function handleSubmit(
+    documentId: string,
+    expectedVersion: number,
+  ) {
+    await submitDocument.mutateAsync({
+      id: documentId,
+      expectedVersion,
+    });
   }
 
-  async function handleReopen(documentId: string, expectedVersion: number) {
-    await reopenDocument.mutateAsync({ id: documentId, expectedVersion });
+  async function handleReopen(
+    documentId: string,
+    expectedVersion: number,
+  ) {
+    await reopenDocument.mutateAsync({
+      id: documentId,
+      expectedVersion,
+    });
   }
 
   return (
     <div className="space-y-6">
-      {/* header */}
       <div>
         <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
           Author workspace
         </p>
-        <h1 className="text-3xl font-semibold tracking-tight">My Documents</h1>
+
+        <h1 className="text-3xl font-semibold tracking-tight">
+          My Documents
+        </h1>
       </div>
 
-      {/* create */}
       <Card>
         <CardHeader>
           <CardTitle>Create a Document</CardTitle>
         </CardHeader>
+
         <CardContent className="space-y-3">
           <Input
             placeholder="Document title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+
           <textarea
-            className="min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-            placeholder="Write your document…"
+            className="min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none"
+            placeholder="Write your document..."
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />
+
           <Button
             onClick={handleCreate}
             disabled={createDocument.isPending}
             className="gap-2"
           >
             <PlusCircle className="h-4 w-4" />
-            {createDocument.isPending ? "Creating…" : "Create Document"}
+            {createDocument.isPending
+              ? "Creating..."
+              : "Create Document"}
           </Button>
         </CardContent>
       </Card>
 
-      {/* drafts + submitted */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* drafts */}
         <Card>
           <CardHeader>
             <CardTitle>Drafts</CardTitle>
           </CardHeader>
+
           <CardContent className="space-y-4">
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading documents…</p>
+              <p className="text-sm text-muted-foreground">
+                Loading documents...
+              </p>
             ) : draftDocuments.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No draft documents.</p>
+              <p className="text-sm text-muted-foreground">
+                No draft documents.
+              </p>
             ) : (
               draftDocuments.map((document) => {
                 const isEditing = editingId === document.id;
+
                 const isEdited =
                   editTitle.trim() !== document.title.trim() ||
                   editBody.trim() !== document.body.trim();
 
                 return (
-                  <div key={document.id} className="space-y-3 rounded-lg border p-4">
+                  <div
+                    key={document.id}
+                    className="space-y-3 rounded-lg border p-4"
+                  >
                     {isEditing ? (
                       <>
                         <Input
                           value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
+                          onChange={(e) =>
+                            setEditTitle(e.target.value)
+                          }
                         />
+
                         <textarea
-                          className="min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                          className="min-h-40 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none"
                           value={editBody}
-                          onChange={(e) => setEditBody(e.target.value)}
+                          onChange={(e) =>
+                            setEditBody(e.target.value)
+                          }
                         />
+
                         <div className="flex gap-2">
                           {isEdited && (
                             <Button
                               size="sm"
-                              onClick={() => handleSave(document)}
+                              onClick={() =>
+                                handleSave(document)
+                              }
                               disabled={updateDocument.isPending}
                             >
-                              {updateDocument.isPending ? "Saving…" : "Save Changes"}
+                              {updateDocument.isPending
+                                ? "Saving..."
+                                : "Save Changes"}
                             </Button>
                           )}
-                          <Button size="sm" variant="outline" onClick={cancelEditing}>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={cancelEditing}
+                          >
                             Cancel
                           </Button>
                         </div>
@@ -287,7 +350,10 @@ export default function DocumentsView() {
                     ) : (
                       <>
                         <div className="flex items-center justify-between">
-                          <h3 className="font-semibold">{document.title}</h3>
+                          <h3 className="font-semibold">
+                            {document.title}
+                          </h3>
+
                           <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                             {formatStatus(document.status)}
                           </span>
@@ -298,28 +364,44 @@ export default function DocumentsView() {
                         </p>
 
                         <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span>Version {document.version}</span>
-                          <span>Updated {formatDate(document.updatedAt)}</span>
+                          <span>
+                            Version {document.version}
+                          </span>
+
+                          <span>
+                            Updated{" "}
+                            {formatDate(document.updatedAt)}
+                          </span>
                         </div>
 
                         <div className="flex gap-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => startEditing(document)}
+                            onClick={() =>
+                              startEditing(document)
+                            }
                           >
                             Edit
                           </Button>
+
                           <Button
                             size="sm"
-                            onClick={() => handleSubmit(document.id, document.version)}
+                            onClick={() =>
+                              handleSubmit(
+                                document.id,
+                                document.version,
+                              )
+                            }
                             disabled={submitDocument.isPending}
                           >
                             Submit
                           </Button>
                         </div>
 
-                        <AuditToggle documentId={document.id} />
+                        <AuditToggle
+                          documentId={document.id}
+                        />
                       </>
                     )}
                   </div>
@@ -329,23 +411,31 @@ export default function DocumentsView() {
           </CardContent>
         </Card>
 
-        {/* submitted */}
         <Card>
           <CardHeader>
             <CardTitle>Submitted</CardTitle>
           </CardHeader>
+
           <CardContent className="space-y-4">
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading documents…</p>
+              <p className="text-sm text-muted-foreground">
+                Loading documents...
+              </p>
             ) : submittedDocuments.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 No documents are currently under review.
               </p>
             ) : (
               submittedDocuments.map((document) => (
-                <div key={document.id} className="space-y-3 rounded-lg border p-4">
+                <div
+                  key={document.id}
+                  className="space-y-3 rounded-lg border p-4"
+                >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">{document.title}</h3>
+                    <h3 className="font-semibold">
+                      {document.title}
+                    </h3>
+
                     <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                       {formatStatus(document.status)}
                     </span>
@@ -357,7 +447,10 @@ export default function DocumentsView() {
 
                   <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                     <span>Version {document.version}</span>
-                    <span>Updated {formatDate(document.updatedAt)}</span>
+
+                    <span>
+                      Updated {formatDate(document.updatedAt)}
+                    </span>
                   </div>
 
                   <AuditToggle documentId={document.id} />
@@ -368,21 +461,29 @@ export default function DocumentsView() {
         </Card>
       </div>
 
-      {/* rejected */}
       {(isLoading || rejectedDocuments.length > 0) && (
-        <Card className="border-destructive/30">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-destructive">Rejected</CardTitle>
+            <CardTitle>Rejected</CardTitle>
           </CardHeader>
+
           <CardContent className="space-y-4">
             {isLoading ? (
-              <p className="text-sm text-muted-foreground">Loading documents…</p>
+              <p className="text-sm text-muted-foreground">
+                Loading documents...
+              </p>
             ) : (
               rejectedDocuments.map((document) => (
-                <div key={document.id} className="space-y-3 rounded-lg border border-destructive/20 p-4">
+                <div
+                  key={document.id}
+                  className="space-y-3 rounded-lg border p-4"
+                >
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">{document.title}</h3>
-                    <span className="text-xs uppercase tracking-[0.2em] text-destructive">
+                    <h3 className="font-semibold">
+                      {document.title}
+                    </h3>
+
+                    <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                       {formatStatus(document.status)}
                     </span>
                   </div>
@@ -393,21 +494,26 @@ export default function DocumentsView() {
 
                   <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
                     <span>Version {document.version}</span>
-                    <span>Updated {formatDate(document.updatedAt)}</span>
+
+                    <span>
+                      Updated {formatDate(document.updatedAt)}
+                    </span>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="gap-1.5"
-                      onClick={() => handleReopen(document.id, document.version)}
-                      disabled={reopenDocument.isPending}
-                    >
-                      <RotateCcw className="h-3.5 w-3.5" />
-                      {reopenDocument.isPending ? "Reopening…" : "Reopen as Draft"}
-                    </Button>
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() =>
+                      handleReopen(document.id, document.version)
+                    }
+                    disabled={reopenDocument.isPending}
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                    {reopenDocument.isPending
+                      ? "Reopening..."
+                      : "Reopen"}
+                  </Button>
 
                   <AuditToggle documentId={document.id} />
                 </div>
@@ -416,6 +522,55 @@ export default function DocumentsView() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Published</CardTitle>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">
+              Loading documents...
+            </p>
+          ) : publishedDocuments.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No published documents.
+            </p>
+          ) : (
+            publishedDocuments.map((document) => (
+              <div
+                key={document.id}
+                className="space-y-3 rounded-lg border p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold">
+                    {document.title}
+                  </h3>
+
+                  <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                    {formatStatus(document.status)}
+                  </span>
+                </div>
+
+                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
+                  {document.body}
+                </p>
+
+                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  <span>Version {document.version}</span>
+
+                  <span>
+                    Published {formatDate(document.updatedAt)}
+                  </span>
+                </div>
+
+                <AuditToggle documentId={document.id} />
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
