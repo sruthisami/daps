@@ -8,10 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLogin } from "@/frontend/hooks/use-login";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { seededUsers } from "@/frontend/constants/seeded-users";
-import {
-  loginSchema,
-  type LoginInput,
-} from "@/frontend/validations/auth.validation";
+import { loginSchema, type LoginInput } from "@/validations/auth.validation";
 
 export function LoginForm() {
   const login = useLogin();

@@ -1,5 +1,7 @@
 import { api } from "@/frontend/lib/api";
 import type { DocumentItem } from "@/frontend/types/document";
+import { DocumentStatus } from "@/generated/prisma/client";
+import type { AuditEvent } from "@/frontend/types/audit";
 
 export const documentService = {
   async listMy(): Promise<DocumentItem[]> {
@@ -14,6 +16,16 @@ export const documentService = {
 
   async listPublished(): Promise<DocumentItem[]> {
     const response = await api.get("/documents/published");
+    return response.data;
+  },
+
+  async listByStatus(status: DocumentStatus): Promise<DocumentItem[]> {
+    const response = await api.get("/documents", {
+      params: {
+        status,
+      },
+    });
+
     return response.data;
   },
 
@@ -76,4 +88,9 @@ export const documentService = {
     });
     return response.data;
   },
+async audit(id: string): Promise<AuditEvent[]> {
+  const response = await api.get(`/documents/${id}/audit`);
+  return response.data;
+},
 };
+

@@ -1,9 +1,9 @@
 import { requireReviewer } from "@/lib/auth";
 
-import ReviewerPage from "./reviewer-page";
+import PublishPage from "./publish-page";
 
 export default async function Page() {
   await requireReviewer();
 
-  return <ReviewerPage />;
+  return <PublishPage />;
 }

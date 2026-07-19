@@ -51,6 +51,17 @@ export function createDocumentRepository(db: RepositoryDatabaseClient = prisma) 
       });
     },
 
+    findByStatus(status: DocumentStatus): Promise<Document[]> {
+  return db.document.findMany({
+    where: {
+      status,
+    },
+    orderBy: {
+      updatedAt: "desc",
+    },
+  });
+},
+
     async update(
       id: string,
       expectedVersion: number,

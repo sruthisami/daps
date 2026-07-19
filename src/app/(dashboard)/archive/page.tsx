@@ -1,9 +1,9 @@
 import { requireAdmin } from "@/lib/auth";
 
-import AdminPage  from "./admin-page";
+import  ArchivePage from "./archive-page";
 
 export default async function Page() {
   await requireAdmin();
 
-  return <AdminPage />;
+  return <ArchivePage />;
 }

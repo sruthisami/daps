@@ -5,6 +5,8 @@ import {
   Home,
   ShieldCheck,
   Users,
+  Archive,
+  Send,
 } from "lucide-react";
 
 import { UserRole } from "@/generated/prisma/enums";
@@ -41,9 +43,21 @@ export const navLinks: NavLink[] = [
     roles: [UserRole.REVIEWER],
   },
   {
-    title: "Users",
-    href: "/admin/users",
-    icon: Users,
+    title: "Publish",
+    href: "/publish",
+    icon: Send,
+    roles: [UserRole.REVIEWER, UserRole.ADMIN],
+  },
+  {
+    title: "Archived Documents",
+    href: "/archive",
+    icon: Archive,
+    roles: [UserRole.ADMIN],
+  },
+  {
+    title: "Archive",
+    href: "/admin",
+    icon: Archive,
     roles: [UserRole.ADMIN],
   },
   {

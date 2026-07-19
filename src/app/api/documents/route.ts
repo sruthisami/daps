@@ -3,7 +3,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { handleApiError } from "@/lib/api";
 import { requireUser } from "@/lib/auth";
 import { documentService } from "@/services/document.service";
-import { createDocumentSchema } from "@/validations/document.validation";
+import {
+  createDocumentSchema,
+  listDocumentsSchema,
+} from "@/validations/document.validation";
+
+export async function GET(request: NextRequest) {
+  try {
+    const actor = await requireUser();
+
+    const query = listDocumentsSchema.parse({
+      status: request.nextUrl.searchParams.get("status"),
+    });
+
+    const documents = await documentService.findDocumentsByStatus(
+      query.status,
+      actor,
+    );
+
+    return NextResponse.json(documents);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {

@@ -11,11 +11,28 @@ type RouteParams = {
   }>;
 };
 
-export async function POST(request: NextRequest, { params }: RouteParams) {
+export async function POST(
+  request: NextRequest,
+  { params }: RouteParams,
+) {
   try {
     const actor = await requireUser();
 
-    const body = await request.json();
+    let body: unknown;
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        {
+          message: "Request body must be valid JSON.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
     const input = actionDocumentSchema.parse(body);
 
     const { id } = await params;
