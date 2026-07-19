@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# daps
 
-## Getting Started
+A document management system with role-based review workflows. Authors draft and submit documents, reviewers approve or reject them, and admins manage the full lifecycle through to publishing and archiving.
 
-First, run the development server:
+---
+
+## Tech stack
+
+- **Framework** — Next.js (App Router)
+- **Language** — TypeScript
+- **Database** — PostgreSQL(neon) via Prisma ORM
+- **UI** — shadcn/ui + Tailwind CSS
+- **Data fetching** — TanStack Query
+- **Notifications** — Sonner
+
+---
+
+## Prerequisites
+
+- Node.js 18+
+- npm 9+
+- A running PostgreSQL instance
+
+---
+
+## Setup
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sruthisami/daps.git
+cd daps
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Configure environment variables
+
+Copy the example env file and fill in your database URL:
+
+```bash
+cp .env.example .env
+```
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/daps"
+```
+
+### 4. Set up the database
+
+Apply migrations and generate the Prisma client:
+
+```bash
+npx prisma migrate dev
+npx prisma generate
+```
+
+### 5. Seed the database
+
+```bash
+npx prisma db seed
+```
+
+This creates the following users:
+
+| Name | Email | Role |
+|---|---|---|
+| Alice Author | alice@example.com | `AUTHOR` |
+| Ashton Author | ashton@example.com | `AUTHOR` |
+| Bob Reviewer | bob@example.com | `REVIEWER` |
+| Admin User | admin@example.com | `ADMIN` |
+| Viewer User | viewer@example.com | `VIEWER` |
+
+### 6. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Common commands
 
-## Learn More
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npx prisma studio` | Open Prisma database browser |
+| `npx prisma migrate dev` | Apply pending migrations |
+| `npx prisma generate` | Regenerate Prisma client after schema changes |
+| `npx prisma db seed` | Seed the database |
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
