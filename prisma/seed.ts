@@ -9,6 +9,11 @@ async function seedUsers() {
       role: UserRole.AUTHOR,
     },
     {
+      name: "Ashton Author",
+      email: "ashton@example.com",
+      role: UserRole.AUTHOR,
+    },
+    {
       name: "Bob Reviewer",
       email: "bob@example.com",
       role: UserRole.REVIEWER,
