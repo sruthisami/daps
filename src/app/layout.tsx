@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Oxanium } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { QueryProvider } from "@/frontend/providers/query-provider";
+import {AuthProvider} from "@/frontend/providers/auth-provider"
 
 const oxaniumHeading = Oxanium({
   subsets: ["latin"],
@@ -44,13 +45,13 @@ export default function RootLayout({
         oxaniumHeading.variable,
       )}
     >
-      
       <body className="min-h-full flex flex-col">
         <QueryProvider>
-          {children}
-        </QueryProvider>
+    <AuthProvider>
+        {children}
+    </AuthProvider>
+</QueryProvider>
       </body>
-      
     </html>
   );
 }
