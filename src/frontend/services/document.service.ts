@@ -1,7 +1,7 @@
 import { api } from "@/frontend/lib/api";
 import type { DocumentItem } from "@/frontend/types/document";
 import { DocumentStatus } from "@/generated/prisma/client";
-import type { AuditEvent } from "@/frontend/types/audit";
+import type { AuditEvent, ActivityEvent } from "@/frontend/types/audit";
 
 export const documentService = {
   async listMy(): Promise<DocumentItem[]> {
@@ -92,5 +92,10 @@ async audit(id: string): Promise<AuditEvent[]> {
   const response = await api.get(`/documents/${id}/audit`);
   return response.data;
 },
+
+async activity(): Promise<ActivityEvent[]> {
+    const response = await api.get("/documents/activity");
+    return response.data;
+  },
 };
 

@@ -29,6 +29,31 @@ export function createAuditRepository(db: RepositoryDatabaseClient = prisma) {
         },
       });
     },
+    findRecent(limit: number) {
+      return db.auditEvent.findMany({
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+        include: {
+          actor: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+            },
+          },
+          document: {
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              ownerId: true,
+            },
+          },
+        },
+      });
+    },
   };
 }
 

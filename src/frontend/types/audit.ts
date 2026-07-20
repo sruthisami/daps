@@ -38,3 +38,18 @@ export type AuditEvent = {
     role: "VIEWER" | "AUTHOR" | "REVIEWER" | "ADMIN";
   };
 };
+
+export type ActivityEvent = AuditEvent & {
+  document: {
+    id: string;
+    title: string;
+    status:
+      | "DRAFT"
+      | "SUBMITTED"
+      | "REJECTED"
+      | "APPROVED"
+      | "PUBLISHED"
+      | "ARCHIVED";
+  };
+};
+

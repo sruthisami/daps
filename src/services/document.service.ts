@@ -519,28 +519,43 @@ export function createDocumentService(db: ServiceDatabaseClient = prisma) {
 
   //authorization helper for read ops
 
-  function assertCanView(document: Document, user: User): void {
-    if (document.ownerId === user.id) {
-      return;
-    }
+ // Replace the existing assertCanView with this pair:
 
-    if (document.status === DocumentStatus.PUBLISHED) {
-      return;
-    }
+function canViewDocument(
+  document: Pick<Document, "ownerId" | "status">,
+  user: User,
+): boolean {
+  if (document.ownerId === user.id) {
+    return true;
+  }
 
-    if (
-      (user.role === UserRole.REVIEWER || user.role === UserRole.ADMIN) &&
-      (document.status === DocumentStatus.SUBMITTED ||
-        document.status === DocumentStatus.APPROVED ||
-        document.status === DocumentStatus.ARCHIVED)
-    ) {
-      return;
-    }
+  if (user.role === UserRole.ADMIN) {
+    return true;
+  }
 
+  if (document.status === DocumentStatus.PUBLISHED) {
+    return true;
+  }
+
+  if (
+    user.role === UserRole.REVIEWER &&
+    (document.status === DocumentStatus.SUBMITTED ||
+      document.status === DocumentStatus.APPROVED ||
+      document.status === DocumentStatus.ARCHIVED)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+function assertCanView(document: Document, user: User): void {
+  if (!canViewDocument(document, user)) {
     throw new AuthorizationError(
       "You are not authorized to view this document.",
     );
   }
+}
 
   //read ops
   async function findById(id: string, actor: User): Promise<Document> {
@@ -596,6 +611,18 @@ export function createDocumentService(db: ServiceDatabaseClient = prisma) {
 
   return auditRepository.findByDocument(documentId);
   }
+
+  async function findRecentActivity(actor: User, limit = 10) {
+    const auditRepository = createAuditRepository(db);
+
+    const events = await auditRepository.findRecent(limit * 5);
+
+    const visible = events.filter((event) =>
+      canViewDocument(event.document, actor),
+    );
+
+    return visible.slice(0, limit);
+  }
   
 async function findDocumentsByStatus(
   status: DocumentStatus,
@@ -636,6 +663,7 @@ async function findDocumentsByStatus(
     findSubmittedDocuments,
     findPublishedDocuments,
     findDocumentAudit,
+    findRecentActivity,
   };
 }
 

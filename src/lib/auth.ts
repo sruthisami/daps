@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { AuthenticationError } from "@/errors/authentication.error";
-import { AuthorizationError } from "@/errors/authorization.error";
 import { UserRole, type User } from "@/generated/prisma/client";
 import { authService } from "@/services/auth.service";
 import { SESSION_COOKIE_NAME } from "@/utils/auth";
@@ -9,7 +9,7 @@ async function requireRole(role: UserRole): Promise<User> {
   const user = await requireUser();
 
   if (user.role !== role) {
-    throw new AuthorizationError("You are not authorized to access this page.");
+    redirect("/forbidden");
   }
 
   return user;
@@ -19,7 +19,7 @@ export async function requireRoles(allowedRoles: UserRole[]) {
   const user = await requireUser();
 
   if (!allowedRoles.includes(user.role)) {
-    throw new AuthorizationError();
+    redirect("/forbidden");
   }
 
   return user;

@@ -11,6 +11,7 @@ import type {
   UpdateDocumentInput,
 } from "@/frontend/types/document";
 import { DocumentStatus } from "@/generated/prisma/client";
+import { ActivityEvent } from "@/frontend/types/audit";
 
 type QueryOptions = {
   enabled?: boolean;
@@ -243,5 +244,12 @@ export function useDocumentAudit(documentId: string) {
     queryKey: queryKeys.documents.audit(documentId),
     queryFn: () => documentService.audit(documentId),
     enabled: !!documentId,
+  });
+}
+
+export function useRecentActivity() {
+  return useQuery<ActivityEvent[]>({
+    queryKey: queryKeys.activity,
+    queryFn: documentService.activity,
   });
 }
