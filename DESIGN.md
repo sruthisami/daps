@@ -7,8 +7,7 @@ One line from the spec stayed with me throughout the build:
 I kept coming back to it every time I made a decision — what should this endpoint block, what should this check catch, what should the database make impossible. The sections below reflect that thinking.
 
 ## Implementation on 9 user stories in spec
-
-For implementation details, see the [Implementation Document](./9-stories-in-spec.pdf).
+see the [9 stories Document](./9-stories-in-spec.pdf).
 
 ## The most important invariants
 
