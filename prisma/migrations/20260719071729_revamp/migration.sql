@@ -29,3 +29,4 @@ BEFORE UPDATE
 ON "AuditEvent"
 FOR EACH ROW
 EXECUTE FUNCTION prevent_audit_update();
+

@@ -63,14 +63,16 @@ model Document {
   ownerId String
   owner User @relation("OwnedDocuments", fields: [ownerId], references: [id], onDelete: Restrict)
 
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  deletedAt DateTime?
 
   auditEvents AuditEvent[]
 
   @@index([ownerId])
   @@index([status, createdAt])
+  @@index([deletedAt])
 }
 
 model AuditEvent {

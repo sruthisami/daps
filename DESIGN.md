@@ -23,6 +23,7 @@ I kept coming back to it every time I made a decision — what should this endpo
 - `onDelete: Cascade` on `Session → user` so sessions are cleaned up when a user is removed.
 - Indexes on `[status, createdAt]` for the reviewer queue, `[ownerId]` for the author workspace, `[documentId, createdAt]` for audit history, and `[expiresAt]` for session cleanup : each reflects an actual read pattern.
 - Logout is idempotent
+- PostgreSQL triggers make the audit log immutable by rejecting any UPDATE or DELETE on AuditEvent, ensuring audit history is append-only even if someone bypasses the application and executes SQL directly.
 
 **Application code:**
 
@@ -44,6 +45,9 @@ Every mutation includes an `expectedVersion`. The repository uses `updateMany` w
 
 ## What I'd improve with more time
 
-- The session implementation with seeded users is intentionally minimal. A real system needs expiry, rotation, and rate limiting on login.
-- I would want add pagination, sorting , filtering.
-- To scale it further opt for microservices, event bus.
+- The session implementation with seeded users is intentionally minimal. A real system would include refresh token rotation, inactivity timeouts, and rate limiting on login.
+- Add pagination, filtering, and sorting for documents and audit history to keep queries efficient as data grows.
+- Introduce cursor-based pagination for audit logs instead of offset pagination to improve scalability.
+- Add structured metadata to audit events (for example, changed fields) to provide richer change history without parsing document versions.
+- Add observability with structured logging, metrics, and distributed tracing to simplify debugging and production monitoring.
+Replace the monolithic architecture with microservices and an event bus if the system needed to scale across independent services or support asynchronous workflows such as notifications and search indexing.
