@@ -517,9 +517,7 @@ export function createDocumentService(db: ServiceDatabaseClient = prisma) {
     });
   }
 
-  //authorization helper for read ops
-
- // Replace the existing assertCanView with this pair:
+  //authorization helper for read operations
 
 function canViewDocument(
   document: Pick<Document, "ownerId" | "status">,
