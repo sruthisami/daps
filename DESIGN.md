@@ -6,6 +6,10 @@ One line from the spec stayed with me throughout the build:
  
 I kept coming back to it every time I made a decision — what should this endpoint block, what should this check catch, what should the database make impossible. The sections below reflect that thinking.
 
+## Implementation on 9 user stories in spec
+
+For implementation details, see the [Implementation Document](./9-stories-in-spec.pdf).
+
 ## The most important invariants
 
 - A document's state and its audit event change in the same transaction or not at all.
@@ -24,6 +28,7 @@ I kept coming back to it every time I made a decision — what should this endpo
 - Indexes on `[status, createdAt]` for the reviewer queue, `[ownerId]` for the author workspace, `[documentId, createdAt]` for audit history, and `[expiresAt]` for session cleanup : each reflects an actual read pattern.
 - Logout is idempotent
 - PostgreSQL triggers make the audit log immutable by rejecting any UPDATE or DELETE on AuditEvent, ensuring audit history is append-only even if someone bypasses the application and executes SQL directly.
+- Deleted documents are never physically removed from the database. Soft deletes preserve document history and audit integrity.
 
 **Application code:**
 
