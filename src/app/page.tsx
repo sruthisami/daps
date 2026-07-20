@@ -22,13 +22,18 @@ export default function HomePage() {
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button size="lg" render={<Link href="/login" />}>
+            <Button
+              size="lg"
+              nativeButton={false}
+              render={<Link href="/login" />}
+            >
               Sign in
             </Button>
 
             <Button
               variant="outline"
               size="lg"
+              nativeButton={false}
               render={<Link href="/dashboard" />}
             >
               Dashboard
@@ -81,7 +86,6 @@ export default function HomePage() {
             </CardContent>
           </Card>
         </div>
-
       </div>
     </main>
   );
