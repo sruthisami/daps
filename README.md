@@ -4,6 +4,8 @@ A document management system with role-based review workflows. Authors draft and
 
 ---
 
+For implementation details, see the [DESIGN.md](./DESIGN.md).
+
 ## Tech stack
 
 - **Framework** — Next.js (App Router)
