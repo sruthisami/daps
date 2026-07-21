@@ -1,6 +1,12 @@
 # Controlled Document Approval System
 
-A document management system with role-based review workflows. Authors draft and submit documents, reviewers approve or reject them, and admins manage the full lifecycle through to publishing and archiving. 
+A document management system with role-based review workflows. Authors draft and submit documents, reviewers approve or reject them and later publish, and admins manage the full lifecycle through to publishing and archiving.
+
+---
+
+## State Transitions
+
+![Document state transitions](./state-transitions.png)
 
 ---
 
@@ -96,4 +102,3 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npx prisma migrate dev` | Apply pending migrations |
 | `npx prisma generate` | Regenerate Prisma client after schema changes |
 | `npx prisma db seed` | Seed the database |
-
